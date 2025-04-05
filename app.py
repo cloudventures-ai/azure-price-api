@@ -43,3 +43,28 @@ def get_price():
         "total_price": total_price
     })
 
+@app.route("/regions")
+def get_regions():
+    try:
+        conn = psycopg2.connect(**DB)
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT DISTINCT arm_region_name
+            FROM azure_prices
+            WHERE arm_region_name IS NOT NULL
+            ORDER BY arm_region_name ASC
+        """)
+
+        rows = cur.fetchall()
+        regions = [row[0] for row in rows]
+
+        cur.close()
+        conn.close()
+
+        return jsonify(regions)
+
+    except Exception as e:
+        return jsonify({ "error": str(e) }), 500
+
+
